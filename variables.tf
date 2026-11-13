@@ -123,5 +123,29 @@ EOT
       value = string
     })))
   }))
+  validation {
+    condition = alltrue([
+      for k, v in var.customers : (
+        v.tax_exempt == null || (contains(["exempt", "none", "reverse"], v.tax_exempt))
+      )
+    ])
+    error_message = "must be one of: \"exempt\", \"none\", \"reverse\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.customers : (
+        v.cash_balance == null || alltrue([for item in v.cash_balance : (item.settings == null || alltrue([for item in item.settings : (item.reconciliation_mode == null || (contains(["automatic", "manual"], item.reconciliation_mode)))]))])
+      )
+    ])
+    error_message = "must be one of: \"automatic\", \"manual\""
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.customers : (
+        v.tax == null || alltrue([for item in v.tax : (item.validate_location == null || (contains(["deferred", "immediately"], item.validate_location)))])
+      )
+    ])
+    error_message = "must be one of: \"deferred\", \"immediately\""
+  }
 }
 
